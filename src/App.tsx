@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Plants from "./pages/Plants";
 import Irrigation from "./pages/Irrigation";
 import Calendar from "./pages/Calendar";
+import GreenHousePlanner from "./pages/GreenHousePlanner";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/plants" element={<Plants />} />
             <Route path="/irrigation" element={<Irrigation />} />
             <Route path="/calendar" element={<Calendar />} />
+            <Route path="/planner" element={<GreenHousePlanner />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
