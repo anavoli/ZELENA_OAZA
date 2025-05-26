@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Bell, Wifi, Database, Shield, User, Save } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Wifi, Database, Shield, User, Save, Thermometer } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 
 const Settings = () => {
   const [notifications, setNotifications] = useState({
@@ -15,7 +16,8 @@ const Settings = () => {
     autoWatering: true,
     temperatureControl: false,
     lightAdjustment: true,
-    moistureThreshold: 40
+    moistureThreshold: 40,
+    optimalTemperature: 22
   });
 
   const handleNotificationChange = (key: string) => {
@@ -24,6 +26,10 @@ const Settings = () => {
 
   const handleAutomationChange = (key: string) => {
     setAutomation(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleTemperatureChange = (value: number[]) => {
+    setAutomation(prev => ({ ...prev, optimalTemperature: value[0] }));
   };
 
   return (
@@ -197,6 +203,33 @@ const Settings = () => {
                   <span>20%</span>
                   <span>50%</span>
                   <span>80%</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center space-x-3 mb-3">
+                  <Thermometer className="h-5 w-5 text-orange-500" />
+                  <label className="block text-sm font-medium text-gray-700">
+                    Optimalna temperatura ({automation.optimalTemperature}°C)
+                  </label>
+                </div>
+                <div className="space-y-2">
+                  <Slider
+                    value={[automation.optimalTemperature]}
+                    onValueChange={handleTemperatureChange}
+                    max={35}
+                    min={15}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>15°C</span>
+                    <span>25°C</span>
+                    <span>35°C</span>
+                  </div>
+                  <div className="text-xs text-gray-600 mt-2">
+                    Sistem će održavati temperaturu na {automation.optimalTemperature}°C kada je aktivna kontrola temperature
+                  </div>
                 </div>
               </div>
             </div>
