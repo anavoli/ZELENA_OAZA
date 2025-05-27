@@ -1,10 +1,18 @@
-
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Save, X, Clock, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useForm } from 'react-hook-form';
 
 interface ScheduleItem {
   id: string;
+  time: string;
+  zones: string[];
+  duration: number;
+  active: boolean;
+  days: string[];
+}
+
+interface ScheduleFormData {
   time: string;
   zones: string[];
   duration: number;
@@ -67,6 +75,7 @@ const IrrigationScheduleManager = ({ onClose }: IrrigationScheduleManagerProps) 
   ];
 
   const createNewSchedule = () => {
+    console.log('Creating new schedule...'); // Debug log
     const newSchedule: ScheduleItem = {
       id: Date.now().toString(),
       time: '08:00',
@@ -77,9 +86,11 @@ const IrrigationScheduleManager = ({ onClose }: IrrigationScheduleManagerProps) 
     };
     setEditingSchedule(newSchedule);
     setIsCreating(true);
+    console.log('New schedule created:', newSchedule); // Debug log
   };
 
   const saveSchedule = (schedule: ScheduleItem) => {
+    console.log('Saving schedule:', schedule); // Debug log
     if (isCreating) {
       setSchedules([...schedules, schedule]);
       setIsCreating(false);
@@ -97,6 +108,12 @@ const IrrigationScheduleManager = ({ onClose }: IrrigationScheduleManagerProps) 
     setSchedules(schedules.map(s => 
       s.id === id ? { ...s, active: !s.active } : s
     ));
+  };
+
+  const cancelEdit = () => {
+    console.log('Canceling edit...'); // Debug log
+    setEditingSchedule(null);
+    setIsCreating(false);
   };
 
   return (
@@ -130,10 +147,8 @@ const IrrigationScheduleManager = ({ onClose }: IrrigationScheduleManagerProps) 
                     availableZones={availableZones}
                     daysOfWeek={daysOfWeek}
                     onSave={saveSchedule}
-                    onCancel={() => {
-                      setEditingSchedule(null);
-                      setIsCreating(false);
-                    }}
+                    onCancel={cancelEdit}
+                    isCreating={isCreating}
                   />
                 ) : (
                   <div className="flex items-center justify-between">
@@ -195,6 +210,20 @@ const IrrigationScheduleManager = ({ onClose }: IrrigationScheduleManagerProps) 
                 )}
               </div>
             ))}
+
+            {/* Show new schedule form if creating */}
+            {isCreating && editingSchedule && !schedules.find(s => s.id === editingSchedule.id) && (
+              <div className="border border-gray-200 rounded-lg p-4">
+                <ScheduleEditForm 
+                  schedule={editingSchedule}
+                  availableZones={availableZones}
+                  daysOfWeek={daysOfWeek}
+                  onSave={saveSchedule}
+                  onCancel={cancelEdit}
+                  isCreating={isCreating}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -208,54 +237,71 @@ interface ScheduleEditFormProps {
   daysOfWeek: { key: string; label: string }[];
   onSave: (schedule: ScheduleItem) => void;
   onCancel: () => void;
+  isCreating?: boolean;
 }
 
-const ScheduleEditForm = ({ schedule, availableZones, daysOfWeek, onSave, onCancel }: ScheduleEditFormProps) => {
-  const [formData, setFormData] = useState<ScheduleItem>(schedule);
+const ScheduleEditForm = ({ schedule, availableZones, daysOfWeek, onSave, onCancel, isCreating }: ScheduleEditFormProps) => {
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<ScheduleFormData>({
+    defaultValues: {
+      time: schedule.time,
+      zones: schedule.zones,
+      duration: schedule.duration,
+      active: schedule.active,
+      days: schedule.days
+    }
+  });
+
+  const watchedZones = watch('zones');
+  const watchedDays = watch('days');
 
   const handleZoneToggle = (zone: string) => {
-    setFormData(prev => ({
-      ...prev,
-      zones: prev.zones.includes(zone)
-        ? prev.zones.filter(z => z !== zone)
-        : [...prev.zones, zone]
-    }));
+    const currentZones = watchedZones || [];
+    const newZones = currentZones.includes(zone)
+      ? currentZones.filter(z => z !== zone)
+      : [...currentZones, zone];
+    setValue('zones', newZones);
   };
 
   const handleDayToggle = (day: string) => {
-    setFormData(prev => ({
-      ...prev,
-      days: prev.days.includes(day)
-        ? prev.days.filter(d => d !== day)
-        : [...prev.days, day]
-    }));
+    const currentDays = watchedDays || [];
+    const newDays = currentDays.includes(day)
+      ? currentDays.filter(d => d !== day)
+      : [...currentDays, day];
+    setValue('days', newDays);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.zones.length === 0) {
+  const onSubmit = (data: ScheduleFormData) => {
+    console.log('Form submitted with data:', data); // Debug log
+    
+    if (!data.zones || data.zones.length === 0) {
       alert('Molimo odaberite najmanje jednu zonu');
       return;
     }
-    if (formData.days.length === 0) {
+    if (!data.days || data.days.length === 0) {
       alert('Molimo odaberite najmanje jedan dan');
       return;
     }
-    onSave(formData);
+
+    const updatedSchedule: ScheduleItem = {
+      ...schedule,
+      ...data
+    };
+
+    console.log('Calling onSave with:', updatedSchedule); // Debug log
+    onSave(updatedSchedule);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Vreme</label>
           <input
             type="time"
-            value={formData.time}
-            onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+            {...register('time', { required: 'Vreme je obavezno' })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
           />
+          {errors.time && <span className="text-red-500 text-sm">{errors.time.message}</span>}
         </div>
         
         <div>
@@ -264,19 +310,21 @@ const ScheduleEditForm = ({ schedule, availableZones, daysOfWeek, onSave, onCanc
             type="number"
             min="1"
             max="120"
-            value={formData.duration}
-            onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+            {...register('duration', { 
+              required: 'Trajanje je obavezno',
+              min: { value: 1, message: 'Minimalno 1 minut' },
+              max: { value: 120, message: 'Maksimalno 120 minuta' }
+            })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
           />
+          {errors.duration && <span className="text-red-500 text-sm">{errors.duration.message}</span>}
         </div>
         
         <div className="flex items-end">
           <label className="flex items-center space-x-2">
             <input
               type="checkbox"
-              checked={formData.active}
-              onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))}
+              {...register('active')}
               className="rounded border-gray-300 focus:ring-blue-500"
             />
             <span className="text-sm font-medium text-gray-700">Aktivno</span>
@@ -291,7 +339,7 @@ const ScheduleEditForm = ({ schedule, availableZones, daysOfWeek, onSave, onCanc
             <label key={zone} className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                checked={formData.zones.includes(zone)}
+                checked={(watchedZones || []).includes(zone)}
                 onChange={() => handleZoneToggle(zone)}
                 className="rounded border-gray-300 focus:ring-blue-500"
               />
@@ -308,7 +356,7 @@ const ScheduleEditForm = ({ schedule, availableZones, daysOfWeek, onSave, onCanc
             <label key={day.key} className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                checked={formData.days.includes(day.key)}
+                checked={(watchedDays || []).includes(day.key)}
                 onChange={() => handleDayToggle(day.key)}
                 className="rounded border-gray-300 focus:ring-blue-500"
               />
@@ -321,7 +369,7 @@ const ScheduleEditForm = ({ schedule, availableZones, daysOfWeek, onSave, onCanc
       <div className="flex items-center space-x-4 pt-4">
         <Button type="submit" className="flex items-center space-x-2">
           <Save className="h-4 w-4" />
-          <span>Sačuvaj</span>
+          <span>{isCreating ? 'Kreiraj' : 'Sačuvaj'}</span>
         </Button>
         
         <Button type="button" variant="outline" onClick={onCancel}>
