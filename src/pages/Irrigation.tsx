@@ -1,9 +1,11 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import IrrigationControl from '../components/IrrigationControl';
+import IrrigationScheduleManager from '../components/IrrigationScheduleManager';
 import { Calendar, Clock, Droplets, Settings, TrendingUp } from 'lucide-react';
 
 const Irrigation = () => {
+  const [showScheduleManager, setShowScheduleManager] = useState(false);
+
   const waterUsageData = [
     { day: 'Pon', usage: 45 },
     { day: 'Uto', usage: 38 },
@@ -119,7 +121,10 @@ const Irrigation = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Raspored navodnjavanja</h3>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            <button 
+              onClick={() => setShowScheduleManager(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
               <Settings className="h-4 w-4" />
               <span>Uredi raspored</span>
             </button>
@@ -176,6 +181,11 @@ const Irrigation = () => {
           </div>
         </div>
       </div>
+
+      {/* Schedule Manager Modal */}
+      {showScheduleManager && (
+        <IrrigationScheduleManager onClose={() => setShowScheduleManager(false)} />
+      )}
     </div>
   );
 };
