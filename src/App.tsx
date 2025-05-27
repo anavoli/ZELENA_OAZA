@@ -10,6 +10,7 @@ import Calendar from "./pages/Calendar";
 import GreenHousePlanner from "./pages/GreenHousePlanner";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import Hardware from "./pages/Hardware";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/planner" element={<GreenHousePlanner />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/hardware" element={<Hardware />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

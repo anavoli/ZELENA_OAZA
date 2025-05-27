@@ -1,5 +1,5 @@
 import React from 'react';
-import { Thermometer, Droplets, Sun, Activity } from 'lucide-react';
+import { Thermometer, Droplets, Sun, Activity, Plus } from 'lucide-react';
 import SensorCard from '../components/SensorCard';
 import IrrigationControl from '../components/IrrigationControl';
 import HardwareControl from '../components/HardwareControl';
@@ -60,15 +60,24 @@ const Dashboard = () => {
           />
         </div>
 
-        {/* Main Content Grid */}
+        {/* Combined Irrigation and Automation Controls */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <IrrigationControl />
-          <HardwareControl />
+          <div className="space-y-8">
+            <IrrigationControl />
+            <AutomationRules />
+          </div>
+          <div className="space-y-8">
+            <HardwareControl />
+            <NotificationCenter />
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <AutomationRules />
-          <NotificationCenter />
+        {/* New Rule Button */}
+        <div className="fixed bottom-8 right-8">
+          <button className="flex items-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700 transition-colors">
+            <Plus className="h-5 w-5" />
+            <span>Novo pravilo</span>
+          </button>
         </div>
       </div>
     </div>
