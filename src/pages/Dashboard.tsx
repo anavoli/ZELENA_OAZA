@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Thermometer, Droplets, Sun, Activity } from 'lucide-react';
 import SensorCard from '../components/SensorCard';

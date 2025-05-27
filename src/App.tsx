@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from "./components/Navigation";
 import Dashboard from "./pages/Dashboard";
 import Plants from "./pages/Plants";
-import Irrigation from "./pages/Irrigation";
 import Calendar from "./pages/Calendar";
 import GreenHousePlanner from "./pages/GreenHousePlanner";
 import Analytics from "./pages/Analytics";
@@ -27,7 +25,6 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/plants" element={<Plants />} />
-            <Route path="/irrigation" element={<Irrigation />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/planner" element={<GreenHousePlanner />} />
             <Route path="/analytics" element={<Analytics />} />
